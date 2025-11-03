@@ -19,7 +19,7 @@ export async function createUser(name: string, email: string, password: string, 
     email: email.toLowerCase(), 
     password: hashed, 
     role,
-    queryLimit: role === 'free' ? 10 : 999999 
+    queryLimit: role === 'free' ? 10 : role === 'starter' ? 100 : 999999 
   }).returning();
   return newUser;
 }
@@ -45,7 +45,8 @@ export function verifyToken(token: string) {
 }
 
 export async function hacpGate(prompt: string, userRole: string) {
-  const empathy = Math.random(); // Replace with Azure Language
+  // Placeholder – replace with Azure Language API
+  const empathy = Math.random();
   if (empathy < 0.7 && userRole === 'free') {
     return { pass: false, error: 'HACP™: Low empathy. Upgrade to Pro.' };
   }
