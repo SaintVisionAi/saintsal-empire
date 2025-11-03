@@ -8,7 +8,10 @@ export async function POST(request: NextRequest) {
   });
 
   return new Promise((resolve) => {
-    proxy(request.req, request.res, (err) => {
+    const req = request.req;
+    const res = request.res;
+
+    proxy(req, res, (err) => {
       if (err) {
         resolve(NextResponse.json({ error: 'Proxy error' }, { status: 500 }));
       }
