@@ -35,3 +35,19 @@ export function generateToken(user: any) {
     { expiresIn: '7d' }
   );
 }
+
+export function verifyToken(token: string) {
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET!) as any;
+  } catch {
+    return null;
+  }
+}
+
+export async function hacpGate(prompt: string, userRole: string) {
+  const empathy = Math.random(); // Replace with Azure Language
+  if (empathy < 0.7 && userRole === 'free') {
+    return { pass: false, error: 'HACP™: Low empathy. Upgrade to Pro.' };
+  }
+  return { pass: true, score: empathy };
+}
