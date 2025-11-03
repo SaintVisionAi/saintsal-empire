@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const res = await fetch('http://localhost:4000/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
+  const proxy = createProxyMiddleware({
+    target: 'http://localhost:4000',
+    changeOrigin: true,
+  });
 
-    const data = await res.json();
-    return NextResponse.json(data);
-  } catch (error) {
-    return NextResponse.json({ error: 'Chat error' }, { status: 500 });
-  }
+  return new Promise((resolve) => {
+    proxy(request.req, request.res, (err) => {
+      if (err) {
+        resolve(NextResponse.json({ error: 'Proxy error' }, { status: 500 }));
+      }
+    });
+  });
 }
