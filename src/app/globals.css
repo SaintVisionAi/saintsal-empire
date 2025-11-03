@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gold: #FFD700;
+}
+
+.bg-gold { @apply bg-[var(--gold)]; }
+.text-gold { @apply text-[var(--gold)]; }
