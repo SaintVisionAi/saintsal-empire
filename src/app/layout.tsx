@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import ConditionalSidebar from '@/components/ConditionalSidebar';
+import AuthAlerts from '@/components/AuthAlerts';
+import AuthStatusBar from '@/components/AuthStatusBar';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,6 +23,8 @@ export default function RootLayout({
         <ConditionalSidebar>
           {children}
         </ConditionalSidebar>
+        <AuthAlerts />
+        <AuthStatusBar />
       </body>
     </html>
   );

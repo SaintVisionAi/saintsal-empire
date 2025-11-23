@@ -2,11 +2,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import StreamingChat from '@/components/StreamingChat';
+import { useAuthMonitor } from '@/hooks/useAuthMonitor';
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { authStatus } = useAuthMonitor();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -18,13 +20,18 @@ export default function Dashboard() {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       setUser(payload);
+      
+      // Start auth monitoring on client side
+      if (typeof window !== 'undefined' && authStatus.isAuthenticated) {
+        // Monitoring is handled by useAuthMonitor hook
+      }
     } catch (error) {
       console.error('Token decode error:', error);
       router.push('/auth/login');
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [router, authStatus.isAuthenticated]);
 
   if (loading) {
     return (

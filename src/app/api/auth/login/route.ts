@@ -22,6 +22,21 @@ export async function POST(request: NextRequest) {
 
     const token = generateToken(user);
 
+    // Start auth monitoring
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const { authMonitor } = await import('@/lib/auth-monitor');
+    authMonitor.startMonitoring(user.id, token, ip);
+
+    // Trigger login alert
+    await authMonitor.triggerAlert({
+      type: 'login',
+      userId: user.id,
+      message: 'User logged in successfully',
+      severity: 'info',
+      timestamp: new Date(),
+      ip,
+    });
+
     return NextResponse.json({ 
       success: true, 
       token, 

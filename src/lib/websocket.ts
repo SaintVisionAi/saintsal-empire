@@ -173,7 +173,24 @@ export function broadcastMessage(message: any, userId?: number) {
   clients.forEach((client, clientId) => {
     if (!userId || client.userId === userId) {
       if (client.ws.readyState === WebSocket.OPEN) {
+        try {
+          client.ws.send(data);
+        } catch (error) {
+          console.error('WebSocket send error:', error);
+        }
+      }
+    }
+  });
+}
+
+export function sendToUser(userId: number, message: any) {
+  const data = JSON.stringify(message);
+  clients.forEach((client) => {
+    if (client.userId === userId && client.ws.readyState === WebSocket.OPEN) {
+      try {
         client.ws.send(data);
+      } catch (error) {
+        console.error('WebSocket send error:', error);
       }
     }
   });
