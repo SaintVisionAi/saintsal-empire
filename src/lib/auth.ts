@@ -29,16 +29,22 @@ export async function getUserByEmail(email: string) {
 }
 
 export function generateToken(user: any) {
+  if (!process.env.JWT_SECRET) {
+    console.warn('⚠️  JWT_SECRET not set. Using default (INSECURE - only for development)');
+    console.warn('   Please set JWT_SECRET in your .env file');
+  }
+  const secret = process.env.JWT_SECRET || 'default-insecure-secret-change-in-production';
   return jwt.sign(
-    { userId: user.id, email: user.email, role: user.role },
-    process.env.JWT_SECRET!,
+    { userId: user.id, email: user.email, role: user.role, name: user.name },
+    secret,
     { expiresIn: '7d' }
   );
 }
 
 export function verifyToken(token: string) {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const secret = process.env.JWT_SECRET || 'default-insecure-secret-change-in-production';
+    return jwt.verify(token, secret) as any;
   } catch {
     return null;
   }

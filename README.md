@@ -16,6 +16,10 @@ A high-performance AI platform with real-time streaming, WebSocket support, RAG 
 
 ## Getting Started
 
+### Quick Start
+
+**For detailed setup instructions, see [SETUP.md](./SETUP.md)**
+
 ### Prerequisites
 
 - Node.js 18+ 
@@ -39,12 +43,13 @@ npm install
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
+# Minimum required: DATABASE_URL and JWT_SECRET
 ```
 
 4. Set up the database:
 ```bash
 # Run migrations (if using Drizzle)
-npm run drizzle-kit push
+npx drizzle-kit push
 ```
 
 5. Start the development server:
@@ -53,6 +58,8 @@ npm run dev
 ```
 
 The server will start on [http://localhost:3000](http://localhost:3000) with WebSocket support on `ws://localhost:3000/ws`.
+
+**Note:** The app will start even without a database connection, but database features will be limited. See [SETUP.md](./SETUP.md) for troubleshooting.
 
 ## Environment Variables
 
