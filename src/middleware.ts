@@ -25,14 +25,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // HACP™ Gate for chat paths
-  if (request.nextUrl.pathname.startsWith('/api/chat')) {
-    const body = await request.json();
-    const gate = await hacpGate(body.prompt, verified?.role || 'free');
-    if (!gate.pass) {
-      return NextResponse.json({ error: gate.error }, { status: 403 });
-    }
-  }
+  // Note: HACP™ Gate is now handled in the API route itself
+  // Middleware cannot read request body in Next.js
 
   return NextResponse.next();
 }

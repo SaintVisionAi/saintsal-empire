@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, varchar, integer, boolean, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, varchar, integer, boolean, pgEnum, real } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 export const roleEnum = pgEnum('role', ['free', 'starter', 'pro', 'enterprise']);
@@ -19,7 +19,7 @@ export const conversations = pgTable('conversations', {
   prompt: text('prompt').notNull(),
   response: text('response').notNull(),
   model: varchar('model', { length: 50 }).notNull(),
-  hacpScore: float('hacp_score').notNull(), // 0-1 empathy
+  hacpScore: real('hacp_score').notNull(), // 0-1 empathy
   timestamp: timestamp('timestamp').defaultNow(),
 });
 
