@@ -11,12 +11,15 @@ const anthropic = process.env.ANTHROPIC_API_KEY
 const openai = process.env.OPENAI_API_KEY || process.env.AZURE_OPENAI_API_KEY
   ? new OpenAI({
       apiKey: process.env.OPENAI_API_KEY || process.env.AZURE_OPENAI_API_KEY,
-      baseURL: process.env.AZURE_OPENAI_ENDPOINT || undefined,
+      baseURL: process.env.AZURE_OPENAI_ENDPOINT 
+        ? `${process.env.AZURE_OPENAI_ENDPOINT}openai/deployments/${process.env.AZURE_DEPLOYMENT_GPT5_CORE || 'gpt-4'}` 
+        : undefined,
+      defaultQuery: process.env.AZURE_OPENAI_API_KEY ? { 'api-version': '2024-02-15-preview' } : undefined,
     })
   : null;
 
-const gemini = process.env.GOOGLE_AI_API_KEY
-  ? new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY)
+const gemini = process.env.GOOGLE_AI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY
+  ? new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY)
   : null;
 
 export interface LLMResponse {
@@ -34,9 +37,11 @@ export interface LLMStreamChunk {
 
 /**
  * Get the best available LLM model
+ * Priority: Claude > Azure GPT-5 > GPT-4 > GPT-3.5 > Gemini
  */
-function getBestModel(): 'claude' | 'gpt4' | 'gpt35' | 'gemini' | null {
+function getBestModel(): 'claude' | 'gpt5' | 'gpt4' | 'gpt35' | 'gemini' | null {
   if (anthropic) return 'claude';
+  if (openai && process.env.AZURE_DEPLOYMENT_GPT5_CORE) return 'gpt5';
   if (openai) return 'gpt4';
   if (gemini) return 'gemini';
   return null;
@@ -69,6 +74,9 @@ export async function generateResponse(
     switch (model) {
       case 'claude':
         return await generateClaude(enhancedPrompt, stream);
+      
+      case 'gpt5':
+        return await generateGPT5(enhancedPrompt, stream);
       
       case 'gpt4':
         return await generateGPT4(enhancedPrompt, stream);
@@ -140,6 +148,52 @@ async function generateClaude(
     return {
       text,
       model: 'claude-3-5-sonnet-20241022',
+    };
+  }
+}
+
+/**
+ * Generate using GPT-5 Core (Azure)
+ */
+async function generateGPT5(
+  prompt: string,
+  stream?: (chunk: LLMStreamChunk) => void
+): Promise<LLMResponse> {
+  if (!openai) throw new Error('OpenAI/Azure API not configured');
+
+  const deployment = process.env.AZURE_DEPLOYMENT_GPT5_CORE || 'gpt-5-core';
+
+  if (stream) {
+    const streamResponse = await openai.chat.completions.create({
+      model: deployment,
+      messages: [{ role: 'user', content: prompt }],
+      stream: true,
+    });
+
+    let fullText = '';
+    for await (const chunk of streamResponse) {
+      const text = chunk.choices[0]?.delta?.content || '';
+      if (text) {
+        fullText += text;
+        stream({ text, done: false, model: 'gpt-5-core' });
+      }
+    }
+    stream({ text: '', done: true, model: 'gpt-5-core' });
+
+    return {
+      text: fullText,
+      model: 'gpt-5-core',
+    };
+  } else {
+    const completion = await openai.chat.completions.create({
+      model: deployment,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    return {
+      text: completion.choices[0]?.message?.content || '',
+      model: 'gpt-5-core',
+      tokens: completion.usage?.total_tokens,
     };
   }
 }

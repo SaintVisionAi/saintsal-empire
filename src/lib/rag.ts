@@ -7,7 +7,7 @@ import { eq } from 'drizzle-orm';
 const searchClient = process.env.AZURE_SEARCH_ENDPOINT && process.env.AZURE_SEARCH_KEY
   ? new SearchClient(
       process.env.AZURE_SEARCH_ENDPOINT,
-      process.env.AZURE_SEARCH_INDEX_NAME || 'saintsal-knowledge',
+      process.env.AZURE_SEARCH_INDEX_NAME || 'superman-knowledge',
       new AzureKeyCredential(process.env.AZURE_SEARCH_KEY)
     )
   : null;

@@ -2,10 +2,12 @@ import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
 import * as schema from '@/db/schema';
 
-// Check for database URL
-if (!process.env.DATABASE_URL) {
+// Check for database URL (support both DATABASE_URL and Saint_DATABASE_URL)
+const databaseUrl = process.env.DATABASE_URL || process.env.Saint_DATABASE_URL;
+
+if (!databaseUrl) {
   console.warn('⚠️  DATABASE_URL not set. Database features will be limited.');
-  console.warn('   Please set DATABASE_URL in your .env file');
+  console.warn('   Please set DATABASE_URL or Saint_DATABASE_URL in your .env file');
   console.warn('   Example: DATABASE_URL=postgresql://user:password@host:5432/database');
 }
 
@@ -14,8 +16,8 @@ let sql: any;
 let db: any;
 
 try {
-  if (process.env.DATABASE_URL) {
-    sql = neon(process.env.DATABASE_URL);
+  if (databaseUrl) {
+    sql = neon(databaseUrl);
     db = drizzle(sql, { schema });
   } else {
     // Create a mock db for development when DATABASE_URL is not set
